@@ -13,6 +13,10 @@ namespace ProvaSecureString
             ConsoleKeyInfo key;
 
             Console.Write("Enter password: ");
+            // 
+            // Es capturen les tecles i s'impriemeix per pantalla *
+            // i es guarda el resultat en un SecureString
+            //
             do
             {
                 key = Console.ReadKey(true);
@@ -40,6 +44,13 @@ namespace ProvaSecureString
 
         }
 
+        //
+        // Funció writePassword
+        // secureString paràmetre tipus SecureString
+        // escriu per pantall utilitzant un punter (IntPTR)
+        // un cop utilitzat s'allibera el punter per tal d'eliminar
+        // la informació en text pla
+        //
         static void writePassword (SecureString secureString)
         {
             IntPtr bstr = Marshal.SecureStringToBSTR(secureString);
