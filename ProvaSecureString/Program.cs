@@ -4,9 +4,30 @@ using System.Security;
 
 namespace ProvaSecureString
 {
-    class Program
+    static class Program
     {
         static void Main(string[] args)
+        {
+
+            var pass1 = EnterPassword();
+            var pass2 = EnterPassword();
+
+            if (CompareSecureStrings(pass1, pass2))
+            {
+                Console.Write($"Password has {pass1.Length} chars and is ");
+                WritePassword(pass1);
+            }
+            else
+                Console.WriteLine("Password don't match");
+            Console.ReadKey();
+
+
+
+
+        }
+
+
+        static SecureString EnterPassword()
         {
             // Instantiate the secure string.
             SecureString securePwd = new SecureString();
@@ -36,12 +57,7 @@ namespace ProvaSecureString
                 // Exit if Enter key is pressed.
             } while (key.Key != ConsoleKey.Enter);
             Console.WriteLine();
-            writePassword(securePwd);
-            Console.ReadKey();
-
-
-
-
+            return securePwd;
         }
 
         //
@@ -51,7 +67,7 @@ namespace ProvaSecureString
         // un cop utilitzat s'allibera el punter per tal d'eliminar
         // la informació en text pla
         //
-        static void writePassword (SecureString secureString)
+        static void WritePassword (SecureString secureString)
         {
             IntPtr bstr = Marshal.SecureStringToBSTR(secureString);
 
@@ -59,5 +75,36 @@ namespace ProvaSecureString
 
             Marshal.ZeroFreeBSTR(bstr);
         }
+
+        public static bool CompareSecureStrings(this SecureString ss1, SecureString ss2)
+        {
+            IntPtr bstr1 = IntPtr.Zero;
+            IntPtr bstr2 = IntPtr.Zero;
+            try
+            {
+                bstr1 = Marshal.SecureStringToBSTR(ss1);
+                bstr2 = Marshal.SecureStringToBSTR(ss2);
+                int length1 = Marshal.ReadInt32(bstr1, -4);
+                int length2 = Marshal.ReadInt32(bstr2, -4);
+                if (length1 == length2)
+                {
+                    for (int x = 0; x < length1; ++x)
+                    {
+                        byte b1 = Marshal.ReadByte(bstr1, x);
+                        byte b2 = Marshal.ReadByte(bstr2, x);
+                        if (b1 != b2) return false;
+                    }
+                }
+                else return false;
+                return true;
+            }
+            finally
+            {
+                if (bstr2 != IntPtr.Zero) Marshal.ZeroFreeBSTR(bstr2);
+                if (bstr1 != IntPtr.Zero) Marshal.ZeroFreeBSTR(bstr1);
+            }
+        }
+
+
     }
 }
